@@ -1,8 +1,9 @@
 'use client'
 
-import { FormEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ScrollScene } from '../components/ScrollScene'
+import { OrbitGlow } from '../components/OrbitGlow'
 
 const navLinks = [
   { label: 'Name', id: 'ai' },
@@ -10,103 +11,86 @@ const navLinks = [
   { label: 'Contact', id: 'contact' }
 ]
 
-const heroStatements = ['AI-powered systems', 'Cloud-native scale', 'LLM-driven insights']
+const heroWords = ['AI', 'Scale', 'Systems']
+const sceneDelay = 0.2
 
 const work = [
   {
-    title: 'AI-Powered Archive Search',
-    metric: '35% faster search',
-    highlights: ['OpenAI GPT-4', 'Vector DB', 'React + AWS'],
-    color: 'from-cyan-500/60 to-blue-500/20'
+    title: 'AI Archive Search',
+    metric: '35% faster retrieval',
+    tech: ['OpenAI GPT-4', 'Vector DB', 'React + AWS']
   },
   {
-    title: '500K-Scale Gaming Backend',
+    title: '500K Gaming Core',
     metric: '500K concurrent users',
-    highlights: ['Spring Boot microservices', 'Event-driven streaming', 'Kafka + Redis'],
-    color: 'from-purple-500/60 to-indigo-500/20'
+    tech: ['Spring Boot', 'Event Mesh', 'Kafka + Redis']
   },
   {
-    title: 'Cloud Data Processing',
+    title: 'Cloud Data Platform',
     metric: 'Real-time pipelines',
-    highlights: ['AWS Kinesis + SQS', 'Observability', 'Async workflows'],
-    color: 'from-emerald-500/60 to-lime-500/20'
+    tech: ['Kinesis + SQS', 'Async Observability']
   },
   {
     title: 'FinTech Transaction Core',
-    metric: '50% throughput gain',
-    highlights: ['OAuth2 + TLS', 'High-performance APIs', 'Enterprise readiness'],
-    color: 'from-amber-500/60 to-orange-500/20'
+    metric: '50% throughput boost',
+    tech: ['OAuth2', 'TLS hardening', 'Spring Resilience']
   }
 ]
 
-const impacts = [
-  { label: 'Scale', detail: '500K+ concurrent users supported' },
-  { label: 'Performance', detail: '50% faster APIs' },
-  { label: 'Automation', detail: '25h/week reclaimed via AI workflows' },
-  { label: 'Reliability', detail: '30% latency cut across services' }
-]
+const impacts = ['500K+ users', '50% faster APIs', '25h automation', '30% lower latency']
 
 const research = {
   title: 'Adversarial Image Transformation Defense',
-  detail: 'IEEE-published methodology defending ResNet50 / DenseNet121 against FGSM / PGD',
+  tag: 'IEEE Xplore',
   link: 'https://ieeexplore.ieee.org/document/10737087'
 }
 
-const formInitialState = { name: '', email: '', message: '' }
-
-type FormStatus = 'idle' | 'sending' | 'success'
+const formInitial = { name: '', email: '', message: '' }
 
 export default function HomePage() {
-  const [activeSection, setActiveSection] = useState('ai')
-  const [formData, setFormData] = useState(formInitialState)
-  const [status, setStatus] = useState<FormStatus>('idle')
+  const [active, setActive] = useState('ai')
+  const [form, setForm] = useState(formInitial)
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success'>('idle')
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id || 'ai')
-          }
+          if (entry.isIntersecting) setActive(entry.target.id || 'ai')
         })
       },
       { threshold: 0.45 }
     )
-
     navLinks.forEach((link) => {
-      const element = document.getElementById(link.id)
-      if (element) {
-        observer.observe(element)
-      }
+      const el = document.getElementById(link.id)
+      if (el) observer.observe(el)
     })
-
     return () => observer.disconnect()
   }, [])
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setStatus('sending')
-    const form = event.currentTarget
-    const data = new FormData(form)
+    const data = new FormData(event.currentTarget)
     await fetch('/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams(Array.from(data.entries()) as [string, string][])
     })
+    setForm(formInitial)
     setStatus('success')
-    setFormData(formInitialState)
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-      <nav className="sticky top-4 z-40 mx-auto flex w-full items-center justify-between rounded-full border border-white/15 bg-black/70 px-6 py-3 text-xs font-semibold uppercase tracking-[0.4em] text-white/70 backdrop-blur">
+    <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8">
+      <nav className="sticky top-4 z-40 flex w-full items-center justify-between rounded-full border border-white/10 bg-black/70 px-6 py-3 text-xs font-semibold uppercase tracking-[0.4em] text-white/70 backdrop-blur">
         <span className="text-sm tracking-[0.45em] text-white">Sathvik</span>
         <div className="flex gap-4">
           {navLinks.map((link) => (
             <a
               key={link.id}
               href={`#${link.id}`}
-              className={`transition ${activeSection === link.id ? 'text-cyan-300' : 'hover:text-white'}`}
+              className={`transition ${active === link.id ? 'text-cyan-300' : 'hover:text-white'}`}
             >
               {link.label}
             </a>
@@ -114,65 +98,65 @@ export default function HomePage() {
         </div>
       </nav>
 
-      <ScrollScene id="ai" className="mt-10 w-full" forceRender>
-        <section className="relative overflow-hidden rounded-[50px] border border-white/10 bg-gradient-to-br from-[#080f1d] via-[#05050c] to-[#03030b] px-8 py-12 text-center shadow-2xl">
-          <motion.div
-            className="pointer-events-none absolute inset-0 opacity-40"
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 12, repeat: Infinity }}
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle,_rgba(14,165,233,0.15),_transparent_60%)]" />
-          </motion.div>
-          <div className="relative z-10 space-y-6">
-            <p className="text-xs uppercase tracking-[0.6em] text-white/60">Published IEEE Researcher</p>
-            <h1 className="text-4xl font-semibold leading-tight text-white sm:text-6xl">Building AI-powered scalable systems</h1>
-            <div className="flex flex-wrap justify-center gap-4 text-sm font-semibold uppercase tracking-[0.4em] text-cyan-300">
-              {heroStatements.map((statement) => (
-                <span key={statement} className="rounded-full border border-white/15 px-4 py-2">
-                  {statement}
-                </span>
+      <ScrollScene id="ai" className="w-full" forceRender>
+        <section className="relative overflow-hidden rounded-[60px] border border-white/10 bg-gradient-to-br from-[#050a1f] via-[#03030a] to-[#000000] px-8 py-12 shadow-[0_30px_120px_rgba(2,6,23,0.9)]">
+          <OrbitGlow />
+          <div className="relative z-10 flex h-full flex-col items-center justify-center text-center">
+            <p className="text-xs uppercase tracking-[0.6em] text-white/60">Published IEEE contributor</p>
+            <h1 className="mt-5 text-4xl font-semibold uppercase tracking-tight text-white sm:text-6xl">
+              <span className="text-transparent bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-indigo-400 bg-clip-text">
+                AI-scale
+              </span>{' '}
+              Systems
+            </h1>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm font-semibold uppercase tracking-[0.4em] text-white/70">
+              {heroWords.map((word, idx) => (
+                <motion.span key={word} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.2 }}>
+                  {word}
+                </motion.span>
               ))}
             </div>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="mt-10 flex flex-wrap justify-center gap-5">
               <a
                 href="#projects"
-                className="rounded-full border border-cyan-400/70 px-6 py-3 text-sm font-semibold uppercase tracking-[0.4em] text-white transition hover:bg-cyan-400 hover:text-black"
+                className="rounded-full border border-cyan-400/60 bg-white/10 px-6 py-3 text-xs font-semibold uppercase tracking-[0.4em] text-white transition hover:border-cyan-300"
               >
-                Selected Work
+                Explore Work
               </a>
-              <a href="#contact" className="text-sm font-semibold uppercase tracking-[0.35em] text-white/70 hover:text-white">
-                Work & Contact
+              <a
+                href="#contact"
+                className="text-xs font-semibold uppercase tracking-[0.35em] text-white/70 transition hover:text-white"
+              >
+                Contact
               </a>
             </div>
           </div>
         </section>
       </ScrollScene>
 
-      <ScrollScene id="projects" className="mt-16 w-full">
-        <section className="space-y-8">
+      <ScrollScene id="projects" className="w-full">
+        <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <p className="text-xs uppercase tracking-[0.6em] text-white/60">Selected Work</p>
-            <span className="text-xs uppercase tracking-[0.4em] text-white/40">AI-focused systems</span>
+            <div className="text-xs uppercase tracking-[0.5em] text-white/50">Selected Work</div>
+            <div className="h-0.5 w-32 rounded-full bg-gradient-to-r from-cyan-300 to-blue-600" />
           </div>
           <div className="grid gap-6 md:grid-cols-2">
-            {work.map((item, index) => (
+            {work.map((item, idx) => (
               <motion.div
                 key={item.title}
-                className={`group rounded-[32px] border border-white/10 bg-black/40 p-8 shadow-[0_25px_60px_rgba(0,0,0,0.45)]`}
-                initial={{ opacity: 0, y: 40 }}
+                className="group relative rounded-[32px] border border-white/10 bg-black/40 p-8 shadow-[0_25px_60px_rgba(0,0,0,0.45)]"
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.15 * index, duration: 0.8 }}
-                whileHover={{ translateY: -6 }}
+                transition={{ delay: idx * sceneDelay, duration: 0.9 }}
               >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-                  <span className="text-xs font-semibold uppercase tracking-[0.4em] text-white/50">AI</span>
-                </div>
-                <p className="mt-4 text-3xl font-semibold text-cyan-300">{item.metric}</p>
-                <div className="mt-6 flex flex-wrap gap-2 text-[0.6rem] uppercase tracking-[0.4em] text-white/70">
-                  {item.highlights.map((tag) => (
-                    <span key={tag} className={`rounded-full border border-white/10 bg-gradient-to-r ${item.color} px-3 py-1 text-xs`}> 
+                <div className="pointer-events-none absolute inset-0 -z-10 rounded-[32px] bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 transition group-hover:opacity-30" />
+                <div className="text-xs uppercase tracking-[0.4em] text-white/60">Live</div>
+                <h3 className="mt-3 text-2xl font-semibold text-white">{item.title}</h3>
+                <p className="mt-5 text-4xl font-bold text-cyan-300">{item.metric}</p>
+                <div className="mt-6 flex flex-wrap gap-2 text-[0.65rem] uppercase tracking-[0.4em] text-white/70">
+                  {item.tech.map((tag) => (
+                    <span key={tag} className="rounded-full border border-white/10 px-3 py-1">
                       {tag}
                     </span>
                   ))}
@@ -183,43 +167,41 @@ export default function HomePage() {
         </section>
       </ScrollScene>
 
-      <ScrollScene id="experience" className="mt-16 w-full">
-        <section className="grid gap-6 rounded-[36px] border border-white/10 bg-white/5 p-8 shadow-2xl">
+      <ScrollScene id="experience" className="w-full">
+        <section className="rounded-[40px] border border-white/10 bg-white/5 p-8 shadow-2xl">
           <div className="flex items-center justify-between">
-            <p className="text-xs uppercase tracking-[0.6em] text-white/60">Experience / Impact</p>
-            <span className="text-xs uppercase tracking-[0.4em] text-white/40">Story-driven metrics</span>
+            <div className="text-xs uppercase tracking-[0.5em] text-white/50">Impact</div>
+            <div className="text-xs uppercase tracking-[0.4em] text-white/40">Minimal metrics</div>
           </div>
-          <div className="grid gap-6 md:grid-cols-2">
-            {impacts.map((impact, idx) => (
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            {impacts.map((item, idx) => (
               <motion.div
-                key={impact.label}
-                className="flex flex-col gap-2 rounded-3xl border border-white/5 bg-black/30 p-6"
+                key={item}
+                className="rounded-3xl border border-white/5 bg-black/30 p-5 text-lg font-semibold uppercase tracking-[0.4em] text-white"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.12, duration: 0.8 }}
+                transition={{ delay: idx * 0.12 }}
               >
-                <span className="text-xs uppercase tracking-[0.5em] text-white/60">{impact.label}</span>
-                <p className="text-lg font-semibold text-white">{impact.detail}</p>
+                {item}
               </motion.div>
             ))}
           </div>
         </section>
       </ScrollScene>
 
-      <ScrollScene id="research" className="mt-16 w-full">
-        <section className="rounded-[40px] border border-white/10 bg-gradient-to-tr from-[#040d1e] via-[#050114] to-[#02030b] p-8 shadow-2xl">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.6em] text-white/60">Research</p>
-              <h3 className="text-2xl font-semibold text-white">{research.title}</h3>
-              <p className="mt-3 max-w-3xl text-sm text-white/70">{research.detail}</p>
-            </div>
+      <ScrollScene id="research" className="w-full">
+        <section className="relative overflow-hidden rounded-[40px] border border-white/10 bg-gradient-to-br from-[#080b1d] via-[#04030a] to-[#02020b] p-8 shadow-xl">
+          <OrbitGlow />
+          <div className="relative z-10 flex flex-col gap-4">
+            <div className="text-xs uppercase tracking-[0.6em] text-white/60">Research</div>
+            <h3 className="text-2xl font-semibold text-white">{research.title}</h3>
+            <p className="text-sm uppercase tracking-[0.5em] text-white/50">{research.tag}</p>
             <a
               href={research.link}
               target="_blank"
               rel="noreferrer"
-              className="rounded-full border border-cyan-400/70 px-6 py-3 text-xs font-semibold uppercase tracking-[0.4em] text-cyan-300 transition hover:bg-cyan-400 hover:text-black"
+              className="w-max rounded-full border border-cyan-400/70 px-5 py-2 text-xs font-semibold uppercase tracking-[0.4em] text-cyan-200 transition hover:bg-cyan-400 hover:text-black"
             >
               View Publication
             </a>
@@ -227,31 +209,29 @@ export default function HomePage() {
         </section>
       </ScrollScene>
 
-      <ScrollScene id="contact" className="mt-16 w-full mb-16">
-        <section className="grid gap-10 rounded-[40px] border border-white/10 bg-gradient-to-br from-[#0e172c] to-[#020617] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.65)]">
-          <div>
+      <ScrollScene id="contact" className="w-full mb-10">
+        <section className="rounded-[40px] border border-white/10 bg-gradient-to-br from-[#0c1123] to-[#03030a] p-8 shadow-[0_45px_130px_rgba(0,0,0,0.85)]">
+          <div className="text-center">
             <p className="text-xs uppercase tracking-[0.6em] text-white/60">Contact</p>
-            <h3 className="text-3xl font-semibold text-white">Drop a line for AI / Cloud work</h3>
-            <p className="mt-2 text-sm text-white/60">Email: ravikumard7288@gmail.com</p>
+            <h3 className="mt-3 text-3xl font-semibold text-white">Minimal form. Max impact.</h3>
           </div>
           <form
             name="contact"
             method="POST"
             data-netlify="true"
             data-netlify-honeypot="bot-field"
+            className="mt-6 grid gap-4"
             onSubmit={handleSubmit}
-            className="grid gap-4"
           >
             <input type="hidden" name="form-name" value="contact" />
             <input type="hidden" name="bot-field" />
             <div className="grid gap-4 md:grid-cols-2">
               <input
                 required
-                type="text"
                 name="name"
                 placeholder="Name"
-                value={formData.name}
-                onChange={(event) => setFormData({ ...formData, name: event.target.value })}
+                value={form.name}
+                onChange={(event) => setForm({ ...form, name: event.target.value })}
                 className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/50 focus:border-cyan-400 focus:outline-none"
               />
               <input
@@ -259,8 +239,8 @@ export default function HomePage() {
                 type="email"
                 name="email"
                 placeholder="Email"
-                value={formData.email}
-                onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+                value={form.email}
+                onChange={(event) => setForm({ ...form, email: event.target.value })}
                 className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/50 focus:border-cyan-400 focus:outline-none"
               />
             </div>
@@ -268,9 +248,9 @@ export default function HomePage() {
               required
               name="message"
               rows={4}
-              placeholder="Project or role details"
-              value={formData.message}
-              onChange={(event) => setFormData({ ...formData, message: event.target.value })}
+              placeholder="Project or role"
+              value={form.message}
+              onChange={(event) => setForm({ ...form, message: event.target.value })}
               className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/50 focus:border-cyan-400 focus:outline-none"
             />
             <button
@@ -278,11 +258,9 @@ export default function HomePage() {
               disabled={status === 'sending'}
               className="rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 px-4 py-3 text-sm font-semibold uppercase tracking-[0.4em] text-black transition disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {status === 'sending' ? 'Sending…' : status === 'success' ? 'Message received' : 'Send request'}
+              {status === 'sending' ? 'Sending…' : status === 'success' ? 'Received' : 'Send request'}
             </button>
-            {status === 'success' && (
-              <p className="text-xs uppercase tracking-[0.4em] text-cyan-300">Thanks! I’ll reply soon.</p>
-            )}
+            {status === 'success' && <p className="text-center text-xs uppercase tracking-[0.4em] text-cyan-300">Thanks! I’ll reply soon.</p>}
           </form>
         </section>
       </ScrollScene>
