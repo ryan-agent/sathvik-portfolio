@@ -18,13 +18,19 @@
     "incremental": true,
     "jsx": "react-jsx",
     "moduleDetection": "force",
+    "ignoreDeprecations": "6.0",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
     "module": "esnext",
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "ignoreDeprecations": "6.0"
+    ]
   },
   "include": [
     "next-env.d.ts",
